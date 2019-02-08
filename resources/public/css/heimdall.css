@@ -1,0 +1,21 @@
+th {
+    background-color: #0099FF;
+    color: #FFFFFF;
+}
+
+.navbar {
+    background-color: #0099FF;
+}
+
+.navbar-brand {
+    color: #FFFFFF;
+    font-weight: bolder;
+}
+
+.nav-link {
+    color: #FFFFFF;
+}
+
+.title {
+    color: #0099FF;
+}

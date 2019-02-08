@@ -12,18 +12,24 @@
       [:head
         [:title "Heimdall"]
         [:link {:rel "stylesheet" :href "css/bootstrap.min.css"}]
-        [:link {:rel "stylesheet" :href "css/bootstrap.min.css.map"}]]
+        [:link {:rel "stylesheet" :href "css/bootstrap.min.css.map"}]
+        [:link {:rel "stylesheet" :href "css/heimdall.css"}]]
       [:body
-        [:nav
-          [:a {:class "btn" :href "/configurations"} "Configurations"]
-          [:a {:href "/services"} "Services"]]
-        content]]))
+        [:nav {:class "navbar navbar-expand-lg"}
+          [:a {:class "navbar-brand" :href "/"} "Heimdall"]
+          [:div {:class "collapse navbar-collapse"}
+            [:ul {:class "navbar-nav mr-auto"}
+              [:li {:class "nav-item"}
+                [:a {:class "nav-link" :href "/configurations"} "Configurations"]]
+              [:li {:class "nav-item"}
+                [:a {:class "nav-link" :href "/services"} "Services"]]]]]
+        [:div {:class "container text-center"} content]]]))
 
-(defn- generate-configurations-page []
+(defn- configurations-page []
   (hiccup/html
     [:div
-      [:h1 "Configurations"]
-      [:table
+      [:h1 {:class "title"} "Configurations"]
+      [:table {:class "table table-bordered"}
         [:theader
           [:tr
             [:th "Parameter"]
@@ -36,23 +42,26 @@
             [:td "check interval"]
             [:td (:check-interval @config)]]]]]))
 
-(defn- generate-services-page []
+(defn- services-page []
   (hiccup/html
-    [:h1 "Services"]
-    [:table
+    [:h1 {:class "title"} "Services"]
+    [:table {:class "table table-bordered"}
         [:theader
           [:tr
-            [:th "Service"]
             [:th "Status"]
+            [:th "Service"]
             [:th "Last Check"]]]
         [:tbody]]))
 
+(defn- not-found-page []
+  (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
+
 (defroutes heimdall-routes
-  (GET "/" [] (generate-page (generate-configurations-page)))
-  (GET "/configurations" [] (generate-page (generate-configurations-page)))
-  (GET "/services" [] (generate-page (generate-services-page)))
+  (GET "/" [] (generate-page (configurations-page)))
+  (GET "/configurations" [] (generate-page (configurations-page)))
+  (GET "/services" [] (generate-page (services-page)))
   (route/resources "/")
-  (route/not-found (generate-page [:div "Page not found!"])))
+  (route/not-found (generate-page (not-found-page))))
 
 (defn start-server 
   "Start the web server" 
