@@ -1,1 +1,1 @@
-[:name "bla"]
+{:port 3000 :check-interval 300 :services {}}
