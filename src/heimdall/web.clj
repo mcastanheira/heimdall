@@ -3,8 +3,7 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.adapter.jetty :as jetty]
-    [hiccup.core :as hiccup]
-    [heimdall.config :refer [config]]))
+    [hiccup.core :as hiccup]))
 
 (defn- generate-page [content]
   (hiccup/html 
@@ -25,7 +24,7 @@
                 [:a {:class "nav-link" :href "/services"} "Services"]]]]]
         [:div {:class "container text-center"} content]]]))
 
-(defn- configurations-page []
+(defn- configurations-page [config]
   (hiccup/html
     [:div
       [:h1 {:class "title"} "Configurations"]
@@ -37,12 +36,12 @@
         [:tbody
           [:tr
             [:td "port"]
-            [:td (:port @config)]]
+            [:td (:port config)]]
           [:tr
             [:td "check interval"]
-            [:td (:check-interval @config)]]]]]))
+            [:td (:check-interval config)]]]]]))
 
-(defn- services-page []
+(defn- services-page [config]
   (hiccup/html
     [:h1 {:class "title"} "Services"]
     [:table {:class "table table-bordered"}
@@ -56,14 +55,14 @@
 (defn- not-found-page []
   (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
 
-(defroutes heimdall-routes
-  (GET "/" [] (generate-page (configurations-page)))
-  (GET "/configurations" [] (generate-page (configurations-page)))
-  (GET "/services" [] (generate-page (services-page)))
-  (route/resources "/")
-  (route/not-found (generate-page (not-found-page))))
-
 (defn start-server 
   "Start the web server" 
-  [port]
-  (jetty/run-jetty heimdall-routes {:port port}))
+  [config]
+  (jetty/run-jetty 
+    (routes 
+      (GET "/" [] (generate-page (configurations-page config)))
+      (GET "/configurations" [] (generate-page (configurations-page config)))
+      (GET "/services" [] (generate-page (services-page config)))
+      (route/resources "/")
+      (route/not-found (generate-page (not-found-page)))) 
+    {:port (:port config) :join? false}))

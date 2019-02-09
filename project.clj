@@ -11,6 +11,7 @@
     [ring/ring-core "1.6.3"]
     [ring/ring-jetty-adapter "1.6.3"]
     [hiccup "1.0.5"]
+    [overtone/at-at "1.2.0"]
     [javax.servlet/servlet-api "2.5"]]
   :main ^:skip-aot heimdall.core
   :target-path "target/%s"

@@ -1,1 +1,1 @@
-{:port 3000 :check-interval 300 :services {}}
+{:port 3000 :check-interval 300 :database {} :services []}
