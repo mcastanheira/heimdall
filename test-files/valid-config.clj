@@ -1,10 +1,10 @@
 {
   :port 3000 
-  :check-interval 10 
+  :check-interval 300 
   :database {
     :class-name "class-name" 
     :url "url" 
     :username "username" 
     :password "password"} 
   :services [
-    {:uuid "1" :name "Heimdall" :ports [3000 3001] :heart-beat-url "/"}]}
+    {:uuid "uuid" :name "name" :ports [] :heart-beat-url "/"}]}
