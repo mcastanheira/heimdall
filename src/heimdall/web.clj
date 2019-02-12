@@ -24,7 +24,7 @@
                 [:a {:class "nav-link" :href "/services"} "Services"]]]]]
         [:div {:class "container text-center"} content]]]))
 
-(defn- configurations-page [port check-interval database-url]
+(defn- configurations-page [port check-interval]
   (hiccup/html
     [:div
       [:h1 {:class "title"} "Configurations"]
@@ -39,10 +39,7 @@
             [:td port]]
           [:tr
             [:td "check interval"]
-            [:td check-interval]]
-          [:tr
-            [:td "database url"]
-            [:td database-url]]]]]))
+            [:td check-interval]]]]]))
 
 (defn- services-page [services]
   (hiccup/html
@@ -64,16 +61,15 @@
   (let [
     port (:port config)
     check-interval (:check-interval config)
-    database-url (:url (:database config))
     services (:services config)]
     (jetty/run-jetty 
       (routes 
         (GET "/" [] 
           (generate-page 
-            (configurations-page port check-interval database-url)))
+            (configurations-page port check-interval)))
         (GET "/configurations" [] 
           (generate-page 
-            (configurations-page port check-interval database-url)))
+            (configurations-page port check-interval)))
         (GET "/services" [] (generate-page (services-page services)))
         (route/resources "/")
         (route/not-found (generate-page (not-found-page)))) 

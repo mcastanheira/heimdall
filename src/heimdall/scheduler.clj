@@ -15,10 +15,9 @@
 
 (defn start-scheduler
   "Starts a scheduler for check each registered service"
-  [services check-interval]
-  (let [pool (at/mk-pool)]
-    (log/info (* check-interval 1000))
+  [config]
+  (let [pool (at/mk-pool) check-interval (:check-interval config) services (:services config)]
     (at/every 
-      (* check-interval 1) 
-      #(doseq [service services] (check-service service)) 
+      (* check-interval 1000) 
+      #(println services) 
       pool)))
