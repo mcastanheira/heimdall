@@ -1,5 +1,6 @@
 (ns heimdall.web
   (:require 
+    [heimdall.database :as database]
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.adapter.jetty :as jetty]
@@ -41,6 +42,12 @@
             [:td "check interval"]
             [:td check-interval]]]]]))
 
+(defn- service-row [service-check]
+  [:tr
+    [:td (:status service-check)]
+    [:td ""]
+    [:td (:timestamp service-check)]])
+
 (defn- services-page [services]
   (hiccup/html
     [:h1 {:class "title"} "Services"]
@@ -50,7 +57,7 @@
             [:th "Status"]
             [:th "Service"]
             [:th "Last Check"]]]
-        [:tbody]]))
+        [:tbody (map service-row (database/get-checks (map :uuid services)))]]))
 
 (defn- not-found-page []
   (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
