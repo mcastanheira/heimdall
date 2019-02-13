@@ -19,3 +19,11 @@ th {
 .title {
     color: #009944;
 }
+
+.fa-check-circle {
+    color: #009944;
+}
+
+.fa-times-circle {
+    color: #FF0000;
+}

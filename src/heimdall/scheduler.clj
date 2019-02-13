@@ -15,10 +15,10 @@
       (try
         (let [response (make-request url)]
           (if (= response 200)
-            {:uuid (:uuid service) :port port :status :ok :message "" :timestamp (Date.)}
-            {:uuid (:uuid service) :port port :status :error :message response :timestamp (Date.)}))
+            {:uuid (:uuid service) :name (:name service) :port port :status :ok :message "" :timestamp (Date.)}
+            {:uuid (:uuid service) :name (:name service) :port port :status :error :message response :timestamp (Date.)}))
         (catch Exception e
-          {:uuid (:uuid service) :port port :status :error :message (.getMessage e) :timestamp (Date.)}))))
+          {:uuid (:uuid service) :name (:name service) :port port :status :error :message (.getMessage e) :timestamp (Date.)}))))
   ([service]
     (map #(check-service service %) (:ports service))))
 

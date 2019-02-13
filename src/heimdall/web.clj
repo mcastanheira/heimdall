@@ -4,7 +4,8 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.adapter.jetty :as jetty]
-    [hiccup.core :as hiccup]))
+    [hiccup.core :as hiccup])
+  (:import [java.text SimpleDateFormat]))
 
 (defn- generate-page [content]
   (hiccup/html 
@@ -13,6 +14,7 @@
         [:title "Heimdall"]
         [:link {:rel "stylesheet" :href "css/bootstrap.min.css"}]
         [:link {:rel "stylesheet" :href "css/bootstrap.min.css.map"}]
+        [:link {:rel "stylesheet" :href "css/all.min.css"}]
         [:link {:rel "stylesheet" :href "css/heimdall.css"}]]
       [:body
         [:nav {:class "navbar navbar-expand-lg"}
@@ -25,7 +27,7 @@
                 [:a {:class "nav-link" :href "/services"} "Services"]]]]]
         [:div {:class "container text-center"} content]]]))
 
-(defn- configurations-page [port check-interval]
+(defn- configurations-page [port check-interval timestamp-mask]
   (hiccup/html
     [:div
       [:h1 {:class "title"} "Configurations"]
@@ -40,15 +42,23 @@
             [:td port]]
           [:tr
             [:td "check interval"]
-            [:td check-interval]]]]]))
+            [:td check-interval]]
+          [:tr
+            [:td "timestamp mask"]
+            [:td timestamp-mask]]]]]))
 
-(defn- service-row [service-check]
+(defn- service-row [service-check timestamp-mask]
   [:tr
-    [:td (:status service-check)]
-    [:td ""]
-    [:td (:timestamp service-check)]])
+    [:td {:class "text-center"} 
+      (if (= (:status service-check) :ok) 
+        [:i {:class "far fa-check-circle"}] 
+        [:i {:class "far fa-times-circle"}])]
+    [:td (:name service-check)]
+    [:td (:port service-check)]
+    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp service-check))]
+    [:td (:message service-check)]])
 
-(defn- services-page [services]
+(defn- services-page [services timestamp-mask]
   (hiccup/html
     [:h1 {:class "title"} "Services"]
     [:table {:class "table table-bordered"}
@@ -56,8 +66,10 @@
           [:tr
             [:th "Status"]
             [:th "Service"]
-            [:th "Last Check"]]]
-        [:tbody (map service-row (database/get-checks (map :uuid services)))]]))
+            [:th "Port"]
+            [:th "Last Check"]
+            [:th "Message"]]]
+        [:tbody (map #(service-row % timestamp-mask) (database/get-checks (map :uuid services)))]]))
 
 (defn- not-found-page []
   (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
@@ -68,16 +80,17 @@
   (let [
     port (:port config)
     check-interval (:check-interval config)
-    services (:services config)]
+    services (:services config)
+    timestamp-mask (:timestamp-mask config)]
     (jetty/run-jetty 
       (routes 
         (GET "/" [] 
           (generate-page 
-            (configurations-page port check-interval)))
+            (configurations-page port check-interval timestamp-mask)))
         (GET "/configurations" [] 
           (generate-page 
-            (configurations-page port check-interval)))
-        (GET "/services" [] (generate-page (services-page services)))
+            (configurations-page port check-interval timestamp-mask)))
+        (GET "/services" [] (generate-page (services-page services timestamp-mask)))
         (route/resources "/")
         (route/not-found (generate-page (not-found-page)))) 
       {:port (:port config) :join? false})))
