@@ -20,6 +20,11 @@ th {
     color: #009944;
 }
 
+.btn-default {
+    background-color: #009944;
+    color: #FFFFFF;
+}
+
 .fa-check-circle {
     color: #009944;
 }

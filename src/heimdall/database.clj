@@ -28,14 +28,14 @@
       (catch Exception e 
         (println (.getMessage e)))))
 
-(defn- get-checks-by-service
-  ([service]
-    (map #(get-checks-by-service service %) (:ports service)))
-  ([service port]
-    (jdbc/query db [
-      "select * from checks where uuid = ? and port = ? order by timestamp desc limit 1" 
-      (:uuid service)
-      port])))
+(defn get-checks-by-uuid-and-port 
+  ([uuid port limit]
+    (jdbc/query db ["select * from checks where uuid = ? and port = ? order by timestamp desc limit ?" uuid port limit]))
+  ([uuid port]
+    (get-checks-by-uuid-and-port uuid port 1)))
+
+(defn- get-checks-by-service [service]
+  (map #(get-checks-by-uuid-and-port (:uuid service) %) (:ports service)))
 
 (defn get-checks [services]
   (flatten (map get-checks-by-service services)))
