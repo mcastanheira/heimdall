@@ -1,0 +1,1 @@
+setInterval(() => document.location.href = '/services', 60000);

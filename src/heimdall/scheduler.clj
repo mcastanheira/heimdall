@@ -7,6 +7,7 @@
   (:import (java.util Date)))
 
 (defn- make-request [url]
+  (log/info (str "Making request to " url))
   (:status (http/get url {:conn-timeout 3000})))
 
 (defn- check-service 

@@ -13,6 +13,8 @@
     [hiccup "1.0.5"]
     [overtone/at-at "1.2.0"]
     [clj-http "3.9.1"]
+    [org.clojure/java.jdbc "0.7.8"]
+    [org.xerial/sqlite-jdbc "3.23.1"]
     [javax.servlet/servlet-api "2.5"]]
   :main ^:skip-aot heimdall.core
   :target-path "target/%s"

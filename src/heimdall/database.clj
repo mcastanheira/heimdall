@@ -1,9 +1,43 @@
-(ns heimdall.database)
+(ns heimdall.database
+  (:require 
+    [clojure.java.jdbc :as jdbc]
+    [clojure.string :as string]))
 
-(def checks (atom []))
+(def db {
+  :classname   "org.sqlite.JDBC"
+  :subprotocol "sqlite"
+  :subname     "db/heimdall.db"})
 
-(defn add-checks [new-checks]
-  (swap! checks concat new-checks))
+(defn- create-db []
+  (try 
+    (jdbc/db-do-commands db
+      (jdbc/create-table-ddl :checks [
+        [:uuid :text] 
+        [:name :text] 
+        [:port :integer] 
+        [:status :text] 
+        [:message :text] 
+        [:timestamp :datetime]]))
+    (catch Exception e
+      (println (.getMessage e)))))
+  
 
-(defn get-checks [uuids]
-  @checks)
+(defn add-checks [checks]
+  (try 
+    (jdbc/insert-multi! db :checks checks) 
+      (catch Exception e 
+        (println (.getMessage e)))))
+
+(defn- get-checks-by-service
+  ([service]
+    (map #(get-checks-by-service service %) (:ports service)))
+  ([service port]
+    (jdbc/query db [
+      "select * from checks where uuid = ? and port = ? order by timestamp desc limit 1" 
+      (:uuid service)
+      port])))
+
+(defn get-checks [services]
+  (flatten (map get-checks-by-service services)))
+
+(create-db)

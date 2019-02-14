@@ -50,7 +50,7 @@
 (defn- service-row [service-check timestamp-mask]
   [:tr
     [:td {:class "text-center"} 
-      (if (= (:status service-check) :ok) 
+      (if (= (:status service-check) ":ok") 
         [:i {:class "far fa-check-circle"}] 
         [:i {:class "far fa-times-circle"}])]
     [:td (:name service-check)]
@@ -69,7 +69,8 @@
             [:th "Port"]
             [:th "Last Check"]
             [:th "Message"]]]
-        [:tbody (map #(service-row % timestamp-mask) (database/get-checks (map :uuid services)))]]))
+        [:tbody (map #(service-row % timestamp-mask) (database/get-checks services))]]
+    [:script {:src "js/reload.js"}]))
 
 (defn- not-found-page []
   (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
