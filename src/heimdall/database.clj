@@ -11,16 +11,24 @@
 (defn- create-db []
   (try 
     (jdbc/db-do-commands db
-      (jdbc/create-table-ddl :checks [
-        [:uuid :text] 
+      (jdbc/create-table-ddl :services [
+        [:id :integer :primary :key :autoincrement] 
         [:name :text] 
-        [:port :integer] 
-        [:status :text] 
-        [:message :text] 
-        [:timestamp :datetime]]))
+        [:origin :text]
+        [:port :integer]
+        [:heartbeat :text]
+        [:restart :boolean]
+        [:command :text]]))
     (catch Exception e
       (println (.getMessage e)))))
-  
+
+(defn save-service [service]
+  (try
+    (if (:id service)
+      (println "id existe")
+      (println "não existe"))
+    (catch Exception e
+      (println (.getMessage e)))))  
 
 (defn add-checks [checks]
   (try 

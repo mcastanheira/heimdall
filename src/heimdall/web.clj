@@ -4,7 +4,9 @@
     [compojure.core :refer :all]
     [compojure.route :as route]
     [ring.adapter.jetty :as jetty]
-    [hiccup.core :as hiccup])
+    [ring.middleware.params :refer :all]
+    [hiccup.core :as hiccup]
+    [hiccup.form :as form])
   (:import [java.text SimpleDateFormat]))
 
 (defn- generate-page [content]
@@ -22,9 +24,9 @@
           [:div {:class "collapse navbar-collapse"}
             [:ul {:class "navbar-nav mr-auto"}
               [:li {:class "nav-item"}
-                [:a {:class "nav-link" :href "/configurations"} "Configurations"]]
+                [:a {:class "nav-link" :href "/services"} "Services"]]
               [:li {:class "nav-item"}
-                [:a {:class "nav-link" :href "/services"} "Services"]]]]]
+                [:a {:class "nav-link" :href "/configurations"} "Configurations"]]]]]
         [:div {:class "container text-center"} content]]]))
 
 (defn- configurations-page [port check-interval timestamp-mask]
@@ -47,20 +49,20 @@
             [:td "timestamp mask"]
             [:td timestamp-mask]]]]]))
 
-(defn- service-row [service-check timestamp-mask]
-  [:tr
-    [:td {:class "text-center"} 
-      (if (= (:status service-check) ":ok") 
-        [:i {:class "far fa-check-circle"}] 
-        [:i {:class "far fa-times-circle"}])]
-    [:td (:name service-check)]
-    [:td (:port service-check)]
-    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp service-check))]
-    [:td (:message service-check)]
-    [:td {:class "text-center"} 
-      [:a {:class "btn btn-default" :href (str "/services/" (:uuid service-check) "/" (:port service-check))} "view last 10 checks"]]])
+;(defn- service-row [service-check timestamp-mask]
+;  [:tr
+;    [:td {:class "text-center"} 
+;      (if (= (:status service-check) ":ok") 
+;        [:i {:class "far fa-check-circle"}] 
+;        [:i {:class "far fa-times-circle"}])]
+;    [:td (:name service-check)]
+;    [:td (:port service-check)]
+;    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp service-check))]
+;    [:td (:message service-check)]
+;    [:td {:class "text-center"} 
+;      [:a {:class "btn btn-default" :href (str "/services/" (:uuid service-check) "/" (:port service-check))} "view last 10 checks"]]])
 
-(defn- services-page [services timestamp-mask]
+(defn- services-page [timestamp-mask]
   (hiccup/html
     [:h1 {:class "title"} "Services"]
     [:table {:class "table table-bordered"}
@@ -71,33 +73,85 @@
             [:th "Port"]
             [:th "Last Check"]
             [:th "Message"]
-            [:th]]]
-        [:tbody (map #(service-row % timestamp-mask) (database/get-checks services))]]
+            [:th]]]]
+        ;[:tbody (map #(service-row % timestamp-mask) (database/get-services))]]
+    [:a {:href "/services/add" :class "btn btn-default"} "create new service"]
     [:script {:src "/js/reload.js"}]))
 
-(defn- check-row [check timestamp-mask]
-  [:tr
-    [:td {:class "text-center"} 
-      (if (= (:status check) ":ok") 
-        [:i {:class "far fa-check-circle"}] 
-        [:i {:class "far fa-times-circle"}])]
-    [:td (:name check)]
-    [:td (:port check)]
-    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp check))]
-    [:td (:message check)]])
+(defn- service-form [service]
+  (let [{:keys [id name origin host port heartbeat restart command]} service]
+    [:div {:class "container text-left"} 
+      (form/form-to [:post "/services"] 
+        [:div {:class "form-group"} 
+          (form/hidden-field ":id" id)]
+        [:div {:class "form-group"} 
+          (form/label ":name" "Name")
+          (form/text-field {:class "form-control" :placeholder "My Service Name"} ":name" name)]
+        [:div {:class "form-group"} 
+          (form/label "origin" "Origin")
+          [:div
+            [:div {:class "form-check form-check-inline"} 
+              (form/radio-button {:class "form-check-input"} ":origin" (= origin :local) ":local")
+              (form/label {:class "form-check-label"} ":local" "Local")]
+            [:div {:class "form-check form-check-inline"} 
+              (form/radio-button {:class "form-check-input"} ":origin" (= origin :remote) ":remote")
+              (form/label {:class "form-check-label"} ":remote" "Remote")]]]
+        [:div {:class "form-group"} 
+          (form/label ":host" "Host")
+          (form/text-field {:class "form-control" :placeholder "localhost"} ":host" host)]
+        [:div {:class "form-group"} 
+          (form/label ":port" "Port")
+          [:input {:class "form-control" :type "number" :name ":port" :value port :placeholder "8080"}]]
+        [:div {:class "form-group"} 
+          (form/label ":heartbeat" "Heartbeat URL")
+          (form/text-field {:class "form-control" :placeholder "/heartbeat"} ":heartbeat" heartbeat)]
+        [:div {:class "form-group"} 
+          [:div
+            [:div {:class "form-check form-check-inline"} 
+              (form/check-box {:class "form-check-input"} ":restart" restart)
+              (form/label {:class "form-check-label"} ":restart" "Should Restart")]]]
+        [:div {:class "form-group"} 
+          (form/label ":command" "Command to Restart")
+          (form/text-field {:class "form-control" :placeholder "java -jar myService.jar --port 8080"} ":command" command)]
+        [:div {:class "form-group"} 
+          (form/submit-button {:class "btn btn-default"} "save")])]))
 
-(defn- checks-page [uuid port timestamp-mask]
+(defn- add-service-page []
   (hiccup/html
-    [:h1 {:class "title"} "Checks"]
-    [:table {:class "table table-bordered"}
-      [:theader
-        [:tr
-          [:th "Status"]
-          [:th "Service"]
-          [:th "Port"]
-          [:th "Timestamp"]
-          [:th "Message"]]]
-        [:tbody (map #(check-row % timestamp-mask) (database/get-checks-by-uuid-and-port uuid port 10))]]))
+    [:h1 {:class "title"} "Add Service"]
+    (service-form {})))
+
+(defn- edit-service-page [id]
+  (hiccup/html
+    [:h1 {:class "title"} "Edit Service"]
+    (service-form {})))
+
+(defn- save-service [service]
+  (database/save-service service))
+
+;(defn- check-row [check timestamp-mask]
+;  [:tr
+;    [:td {:class "text-center"} 
+;      (if (= (:status check) ":ok") 
+;        [:i {:class "far fa-check-circle"}] 
+;        [:i {:class "far fa-times-circle"}])]
+;    [:td (:name check)]
+;    [:td (:port check)]
+;    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp check))]
+;    [:td (:message check)]])
+
+;(defn- checks-page [uuid port timestamp-mask]
+;  (hiccup/html
+;    [:h1 {:class "title"} "Checks"]
+;    [:table {:class "table table-bordered"}
+;      [:theader
+;        [:tr
+;          [:th "Status"]
+;          [:th "Service"]
+;          [:th "Port"]
+;          [:th "Timestamp"]
+;          [:th "Message"]]]
+;        [:tbody (map #(check-row % timestamp-mask) (database/get-checks-by-uuid-and-port uuid port 10))]]))
 
 (defn- not-found-page []
   (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
@@ -105,21 +159,17 @@
 (defn start-server 
   "Start the web server" 
   [config]
-  (let [
-    port (:port config)
-    check-interval (:check-interval config)
-    services (:services config)
-    timestamp-mask (:timestamp-mask config)]
+  (let [{:keys [port check-interval timestamp-mask]} config]
     (jetty/run-jetty 
-      (routes 
-        (GET "/" [] 
-          (generate-page 
-            (configurations-page port check-interval timestamp-mask)))
-        (GET "/configurations" [] 
-          (generate-page 
-            (configurations-page port check-interval timestamp-mask)))
-        (GET "/services" [] (generate-page (services-page services timestamp-mask)))
-        (GET "/services/:uuid/:port" [uuid port] (generate-page (checks-page uuid port timestamp-mask)))
-        (route/resources "/")
-        (route/not-found (generate-page (not-found-page)))) 
+      (wrap-params
+        (routes 
+          (GET "/" [] (generate-page (configurations-page port check-interval timestamp-mask)))
+          (GET "/configurations" [] (generate-page (configurations-page port check-interval timestamp-mask)))
+          (GET "/services" [] (generate-page (services-page timestamp-mask)))
+          (POST "/services" request  (save-service (:form-params request)))
+          (GET "/services/add" [] (generate-page (add-service-page)))
+          (GET "/services/edit/:id" [id] (generate-page (edit-service-page id)))
+;          (GET "/services/:uuid/:port" [uuid port] (generate-page (checks-page uuid port timestamp-mask)))
+          (route/resources "/")
+          (route/not-found (generate-page (not-found-page)))))
       {:port (:port config) :join? false})))

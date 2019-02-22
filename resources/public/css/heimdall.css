@@ -26,9 +26,11 @@ th {
 }
 
 .fa-check-circle {
+    background-color: #FFFFFF;
     color: #009944;
 }
 
 .fa-times-circle {
+    background-color: #FFFFFF;
     color: #FF0000;
 }

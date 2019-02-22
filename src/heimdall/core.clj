@@ -12,10 +12,10 @@
 (defn -main [& args]
   (let [options (:options (parse-opts args cli-options))]
     (try 
-      (let [config (load-config (:config-file options))]
-        (log/info (str "Loaded configuration from file " (:config-file options)))
+      (let [config-file (:config-file options) config (load-config config-file)]
+        (log/info (str "Loaded configuration from file " config-file))
         (start-server config)
-        (start-scheduler config)
+;        (start-scheduler config)
         (log/info "Scheduler started"))
       (catch Exception e
         (log/error e)))))
