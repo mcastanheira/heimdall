@@ -26,12 +26,16 @@
 (defn get-services []
   (jdbc/query db ["select * from services order by name"]))
 
+(defn get-service [id]
+  (first (jdbc/query db ["select * from services where id = ?" id])))
+
 (defn save-service [service]
-  (println service)
-  (println (= (:id service) "0"))
   (if (= (:id service) 0)
     (jdbc/insert! db :services (dissoc service :id))
-    (jdbc/update! db :services service ["id = ?" (:id service)])))  
+    (jdbc/update! db :services service ["id = ?" (:id service)])))
+
+(defn delete-service [id]
+  (jdbc/delete! db :services ["id = ?" id]))
 
 (defn add-checks [checks]
   (try 

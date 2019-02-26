@@ -34,7 +34,7 @@
   (hiccup/html
     [:div
       [:h1 {:class "title"} "Configurations"]
-      [:table {:class "table table-bordered"}
+      [:table {:class "table"}
         [:theader
           [:tr
             [:th "Parameter"]
@@ -53,23 +53,38 @@
 (defn- service-row [service timestamp-mask]
   [:tr
     [:td (:name service)]
+    [:td (:origin service)]
     [:td (:host service)]
-    [:td (:port service)]])
+    [:td (:port service)]
+    [:td (:heartbeat service)]
+    [:td (:restart service)]
+    [:td
+      [:a {:href (str "/services/edit/" (:id service)) :class "btn btn-default"} "edit"]]
+    [:td
+      (form/form-to [:post "/services/delete"]
+        (form/hidden-field "id" (:id service))
+        (form/submit-button {:class "btn btn-danger"} "delete"))]])
 
 (defn- services-page [timestamp-mask]
   (hiccup/html
     [:h1 {:class "title"} "Services"]
-    [:table {:class "table table-bordered"}
+    [:table {:class "table"}
         [:theader
           [:tr
             [:th "Name"]
+            [:th "Origin"]
             [:th "Host"]
-            [:th "Port"]]]
+            [:th "Port"]
+            [:th "Heartbeat"]
+            [:th "Should Restart"]
+            [:th]
+            [:th]]]
         [:tbody (map #(service-row % timestamp-mask) (database/get-services))]]
     [:a {:href "/services/add" :class "btn btn-default"} "create new service"]
     [:script {:src "/js/reload.js"}]))
 
 (defn- service-form [service]
+  (println service)
   (let [{:keys [id name origin host port heartbeat restart command]} service]
     [:div {:class "container text-left"} 
       (form/form-to [:post "/services"] 
@@ -115,7 +130,7 @@
 (defn- edit-service-page [id]
   (hiccup/html
     [:h1 {:class "title"} "Edit Service"]
-    (service-form {})))
+    (service-form (database/get-service id))))
 
 (defn- transform-form-params-to-service [params]
   {
@@ -131,6 +146,10 @@
 
 (defn- save-service [service]
   (database/save-service service)
+  (response/redirect "/services"))
+
+(defn- delete-service [id]
+  (database/delete-service id)
   (response/redirect "/services"))
 
 ;(defn- check-row [check timestamp-mask]
@@ -173,7 +192,8 @@
           (POST "/services" request  
             (save-service (transform-form-params-to-service (:form-params request))))
           (GET "/services/add" [] (generate-page (add-service-page)))
-          (GET "/services/edit/:id" [id] (generate-page (edit-service-page id)))
+          (GET "/services/edit/:id" [id] (generate-page (edit-service-page (Integer/parseInt id))))
+          (POST "/services/delete" request (delete-service (Integer/parseInt (get (:form-params request) "id"))))
 ;          (GET "/services/:uuid/:port" [uuid port] (generate-page (checks-page uuid port timestamp-mask)))
           (route/resources "/")
           (route/not-found (generate-page (not-found-page)))))
