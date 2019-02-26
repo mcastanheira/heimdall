@@ -15,6 +15,7 @@
         [:id :integer :primary :key :autoincrement] 
         [:name :text] 
         [:origin :text]
+        [:host :text]
         [:port :integer]
         [:heartbeat :text]
         [:restart :boolean]
@@ -22,13 +23,15 @@
     (catch Exception e
       (println (.getMessage e)))))
 
+(defn get-services []
+  (jdbc/query db ["select * from services order by name"]))
+
 (defn save-service [service]
-  (try
-    (if (:id service)
-      (println "id existe")
-      (println "não existe"))
-    (catch Exception e
-      (println (.getMessage e)))))  
+  (println service)
+  (println (= (:id service) "0"))
+  (if (= (:id service) 0)
+    (jdbc/insert! db :services (dissoc service :id))
+    (jdbc/update! db :services service ["id = ?" (:id service)])))  
 
 (defn add-checks [checks]
   (try 
@@ -48,4 +51,4 @@
 (defn get-checks [services]
   (flatten (map get-checks-by-service services)))
 
-(create-db)
+;(create-db)
