@@ -20,9 +20,18 @@ th {
     color: #009944;
 }
 
+.btn {
+    margin: 5px;
+}
+
 .btn-default {
     background-color: #009944;
     color: #FFFFFF;
+}
+
+.btn-secundary {
+    border-color: #009944;
+    color: #009944;
 }
 
 .fa-check-circle {

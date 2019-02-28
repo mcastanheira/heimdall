@@ -57,7 +57,8 @@
     [:td (:host service)]
     [:td (:port service)]
     [:td (:heartbeat service)]
-    [:td (:restart service)]
+    [:td {:class "text-center"} 
+      (if (= (:restart service) 1) [:i {:class "far fa-check-circle"}])]
     [:td
       [:a {:href (str "/services/edit/" (:id service)) :class "btn btn-default"} "edit"]]
     [:td
@@ -114,13 +115,14 @@
         [:div {:class "form-group"} 
           [:div
             [:div {:class "form-check form-check-inline"} 
-              (form/check-box {:class "form-check-input"} "restart" restart)
+              (form/check-box {:class "form-check-input"} "restart" (= restart 1))
               (form/label {:class "form-check-label"} "restart" "Should Restart")]]]
         [:div {:class "form-group"} 
           (form/label "command" "Command to Restart")
           (form/text-field {:class "form-control" :placeholder "java -jar myService.jar --port 8080"} "command" command)]
         [:div {:class "form-group"} 
-          (form/submit-button {:class "btn btn-default"} "save")])]))
+          (form/submit-button {:class "btn btn-default"} "save")
+          [:a {:href "/services" :class "btn btn-secundary"} "back"]])]))
 
 (defn- add-service-page []
   (hiccup/html
