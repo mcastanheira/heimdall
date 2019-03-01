@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <h1 class="title">{{ title }}</h1>
+    <div class="container text-left">
+        <form action="/services" method="post">
+            <div class="form-group">
+                <input name="id" type="hidden" value="{{ service.id }}"/>
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input name="name" type="text" class="form-control" value="{{ service.name }}" placeholder="My Service Name"/>
+            </div>
+            <div class="form-group">
+                <label for="origin">Origin</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input name="origin" type="radio" class="form-check-input" value="local" {% ifequal service.origin "local" %}checked{% endifequal %}/>
+                        <label for="origin" class="form-check-label">Local</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input name="origin" type="radio" class="form-check-input" value="remote" {% ifequal service.origin "remote" %}checked{% endifequal %}/>
+                        <label for="origin" class="form-check-label">Remote</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="host">Host</label>
+                <input name="host" type="text" class="form-control" value="{{ service.host }}" placeholder="localhost"/>
+            </div>
+            <div class="form-group">
+                <label for="port">Port</label>
+                <input name="port" type="number" class="form-control" value="{{ service.port }}" placeholder="8080"/>
+            </div>
+            <div class="form-group">
+                <label for="heartbeat">Heartbeat URL</label>
+                <input name="heartbeat" type="text" class="form-control" value="{{ service.heartbeat }}" placeholder="/heartbeat"/>
+            </div>
+            <div class="form-group">
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input name="restart" type="checkbox" class="form-check-input" {% ifequal service.restart 1 %}checked{% endifequal %}/>
+                        <label for="restart" class="form-check-label">Should Restart</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="command">Command to Restart</label>
+                <input name="command" type="text" class="form-control" value="{{ service.command }}" placeholder="/java -jar myService.jar --port 8080"/>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-default" value="save"/>
+                <a href="/services" class="btn btn-secundary">back</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

@@ -62,7 +62,4 @@
         "select c.status, c.service_id, c.timestamp, c.message, s.name from checks c inner join services s on c.service_id = s.id " 
         "where c.service_id = ? order by c.timestamp desc limit ?") id limit]))
 
-;(defn get-checks [services]
-;  (flatten (map get-checks-by-service services)))
-
 (create-db)

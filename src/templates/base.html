@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Heimdall</title>
+        <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/css/bootstrap.min.css.map"/>
+        <link rel="stylesheet" href="/css/all.min.css"/>
+        <link rel="stylesheet" href="/css/heimdall.css"/>
+    </head>
+    <body>
+        <nav class="navbar navbar-expand-lg">
+            <a class="navbar-brand" href="/">Heimdall</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/checks">Checks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/services">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/configurations">Configurations</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <div class="container text-center">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </body>
+</html>

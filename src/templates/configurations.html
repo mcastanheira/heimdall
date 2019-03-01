@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <h1 class="title">Configurations</h1>
+    <table class="table table-sm">
+        <theader>
+            <tr>
+                <th>Parameter</th>
+                <th>Value</th>
+            </tr>
+        </theader>
+        <tbody>
+            <tr>
+                <td>port</td>
+                <td>{{ port }}</td>
+            </tr>
+            <tr>
+                <td>check interval</td>
+                <td>{{ check-interval }}</td>
+            </tr>
+            <tr>
+                <td>timestamp mask</td>
+                <td>{{ timestamp-mask }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}
