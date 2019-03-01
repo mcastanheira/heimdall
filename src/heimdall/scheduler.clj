@@ -10,21 +10,18 @@
   (log/info (str "Making request to " url))
   (:status (http/get url {:conn-timeout 3000})))
 
-(defn- check-service 
-  ([service port]
-    (let [url (str "http://localhost:" port (:heart-beat-url service))]
+(defn- check-service [service]
+    (let [{:keys [id host port heartbeat]} service url (str "http://" host ":" port heartbeat)]
       (try
         (let [response (make-request url)]
           (if (= response 200)
-            {:uuid (:uuid service) :name (:name service) :port port :status :ok :message "" :timestamp (Date.)}
-            {:uuid (:uuid service) :name (:name service) :port port :status :error :message response :timestamp (Date.)}))
+            {:status :ok :message "" :timestamp (Date.) :service_id id}
+            {:status :error :message response :timestamp (Date.) :service_id id}))
         (catch Exception e
-          {:uuid (:uuid service) :name (:name service) :port port :status :error :message (.getMessage e) :timestamp (Date.)}))))
-  ([service]
-    (map #(check-service service %) (:ports service))))
+          {:status :error :message (.getMessage e) :timestamp (Date.) :service_id id}))))
 
 (defn start-scheduler
   "Starts a scheduler for check each registered service"
   [config]
-  (let [pool (at/mk-pool) check-interval (:check-interval config) services (:services config)]
-    (at/every (* check-interval 1000) #(database/add-checks (flatten (map check-service services))) pool)))
+  (let [pool (at/mk-pool) check-interval (:check-interval config)]
+    (at/every (* check-interval 1000) #(database/save-checks (flatten (map check-service (database/get-services)))) pool)))

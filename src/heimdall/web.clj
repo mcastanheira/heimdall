@@ -25,6 +25,8 @@
           [:div {:class "collapse navbar-collapse"}
             [:ul {:class "navbar-nav mr-auto"}
               [:li {:class "nav-item"}
+                [:a {:class "nav-link" :href "/checks"} "Checks"]]
+              [:li {:class "nav-item"}
                 [:a {:class "nav-link" :href "/services"} "Services"]]
               [:li {:class "nav-item"}
                 [:a {:class "nav-link" :href "/configurations"} "Configurations"]]]]]
@@ -34,7 +36,7 @@
   (hiccup/html
     [:div
       [:h1 {:class "title"} "Configurations"]
-      [:table {:class "table"}
+      [:table {:class "table table-sm"}
         [:theader
           [:tr
             [:th "Parameter"]
@@ -69,7 +71,7 @@
 (defn- services-page [timestamp-mask]
   (hiccup/html
     [:h1 {:class "title"} "Services"]
-    [:table {:class "table"}
+    [:table {:class "table table-sm"}
         [:theader
           [:tr
             [:th "Name"]
@@ -77,12 +79,11 @@
             [:th "Host"]
             [:th "Port"]
             [:th "Heartbeat"]
-            [:th "Should Restart"]
+            [:th {:class "text-center"} "Should Restart"]
             [:th]
             [:th]]]
         [:tbody (map #(service-row % timestamp-mask) (database/get-services))]]
-    [:a {:href "/services/add" :class "btn btn-default"} "create new service"]
-    [:script {:src "/js/reload.js"}]))
+    [:a {:href "/services/add" :class "btn btn-default"} "create new service"]))
 
 (defn- service-form [service]
   (println service)
@@ -154,29 +155,31 @@
   (database/delete-service id)
   (response/redirect "/services"))
 
-;(defn- check-row [check timestamp-mask]
-;  [:tr
-;    [:td {:class "text-center"} 
-;      (if (= (:status check) ":ok") 
-;        [:i {:class "far fa-check-circle"}] 
-;        [:i {:class "far fa-times-circle"}])]
-;    [:td (:name check)]
-;    [:td (:port check)]
-;    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp check))]
-;    [:td (:message check)]])
+(defn- check-row [check timestamp-mask show-links]
+  [:tr
+    [:td {:class "text-center"} 
+      (if (= (:status check) ":ok") 
+        [:i {:class "far fa-check-circle"}] 
+        [:i {:class "far fa-times-circle"}])]
+    [:td (:name check)]
+    [:td (.format (SimpleDateFormat. timestamp-mask) (:timestamp check))]
+    [:td (:message check)]
+    [:td {:class "text-right"} 
+      (if show-links [:a {:href (str "/checks/" (:service_id check)) :class "btn btn-default"} "view last 10 checks"])]])
 
-;(defn- checks-page [uuid port timestamp-mask]
-;  (hiccup/html
-;    [:h1 {:class "title"} "Checks"]
-;    [:table {:class "table table-bordered"}
-;      [:theader
-;        [:tr
-;          [:th "Status"]
-;          [:th "Service"]
-;          [:th "Port"]
-;          [:th "Timestamp"]
-;          [:th "Message"]]]
-;        [:tbody (map #(check-row % timestamp-mask) (database/get-checks-by-uuid-and-port uuid port 10))]]))
+(defn- checks-page [checks timestamp-mask show-links]
+  (hiccup/html
+    [:h1 {:class "title"} "Checks"]
+    [:table {:class "table table-sm"}
+      [:theader
+        [:tr
+          [:th {:class "text-center"} "Status"]
+          [:th "Service"]
+          [:th "Timestamp"]
+          [:th "Message"]
+          [:th]]]
+      [:tbody (map #(check-row % timestamp-mask show-links) checks)]]
+      (if show-links [:script {:src "/js/reload.js"}])))
 
 (defn- not-found-page []
   (hiccup/html [:div {:class "alert alert-danger"} "Page not found!"]))
@@ -188,7 +191,7 @@
     (jetty/run-jetty 
       (wrap-params
         (routes 
-          (GET "/" [] (generate-page (configurations-page port check-interval timestamp-mask)))
+          (GET "/" [] (response/redirect "/checks"))
           (GET "/configurations" [] (generate-page (configurations-page port check-interval timestamp-mask)))
           (GET "/services" [] (generate-page (services-page timestamp-mask)))
           (POST "/services" request  
@@ -196,7 +199,8 @@
           (GET "/services/add" [] (generate-page (add-service-page)))
           (GET "/services/edit/:id" [id] (generate-page (edit-service-page (Integer/parseInt id))))
           (POST "/services/delete" request (delete-service (Integer/parseInt (get (:form-params request) "id"))))
-;          (GET "/services/:uuid/:port" [uuid port] (generate-page (checks-page uuid port timestamp-mask)))
+          (GET "/checks" [] (generate-page (checks-page (database/get-last-checks) timestamp-mask true)))
+          (GET "/checks/:id" [id] (generate-page (checks-page (database/get-last-checks-by-service (Integer/parseInt id) 10) timestamp-mask false)))
           (route/resources "/")
           (route/not-found (generate-page (not-found-page)))))
       {:port (:port config) :join? false})))

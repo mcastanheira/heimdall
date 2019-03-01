@@ -19,7 +19,14 @@
         [:port :integer]
         [:heartbeat :text]
         [:restart :boolean]
-        [:command :text]]))
+        [:command :text]])
+      (jdbc/create-table-ddl :checks [
+        [:id :integer :primary :key :autoincrement] 
+        [:status :text] 
+        [:message :text]
+        [:timestamp :timestamp]
+        [:service_id :integer]
+        ["foreign key(service_id) references services(id)"]]))
     (catch Exception e
       (println (.getMessage e)))))
 
@@ -37,22 +44,25 @@
 (defn delete-service [id]
   (jdbc/delete! db :services ["id = ?" id]))
 
-(defn add-checks [checks]
+(defn save-checks [checks]
   (try 
     (jdbc/insert-multi! db :checks checks) 
       (catch Exception e 
         (println (.getMessage e)))))
 
-(defn get-checks-by-uuid-and-port 
-  ([uuid port limit]
-    (jdbc/query db ["select * from checks where uuid = ? and port = ? order by timestamp desc limit ?" uuid port limit]))
-  ([uuid port]
-    (get-checks-by-uuid-and-port uuid port 1)))
+(defn get-last-checks []
+    (jdbc/query db [
+      (str 
+        "select c.status, c.service_id, c.timestamp, c.message, s.name from checks c inner join services s on c.service_id = s.id " 
+        "order by c.timestamp desc limit (select count(id) from services)")]))
 
-(defn- get-checks-by-service [service]
-  (map #(get-checks-by-uuid-and-port (:uuid service) %) (:ports service)))
+(defn get-last-checks-by-service [id limit]
+    (jdbc/query db [
+      (str 
+        "select c.status, c.service_id, c.timestamp, c.message, s.name from checks c inner join services s on c.service_id = s.id " 
+        "where c.service_id = ? order by c.timestamp desc limit ?") id limit]))
 
-(defn get-checks [services]
-  (flatten (map get-checks-by-service services)))
+;(defn get-checks [services]
+;  (flatten (map get-checks-by-service services)))
 
-;(create-db)
+(create-db)

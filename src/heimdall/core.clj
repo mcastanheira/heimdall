@@ -15,7 +15,7 @@
       (let [config-file (:config-file options) config (load-config config-file)]
         (log/info (str "Loaded configuration from file " config-file))
         (start-server config)
-;        (start-scheduler config)
+        (start-scheduler config)
         (log/info "Scheduler started"))
       (catch Exception e
         (log/error e)))))
