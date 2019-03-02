@@ -23,6 +23,12 @@
                 </ul>
             </div>
         </nav>
+        {% if success-message %}
+            <div class="alert alert-success" role="alert">{{ success-message }}</div>
+        {% endif %}
+        {% if failure-message %}
+            <div class="alert alert-danger" role="alert">{{ failure-message }}</div>
+        {% endif %}
         <div class="container text-center">
             {% block content %}
             {% endblock %}
