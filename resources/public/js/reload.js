@@ -1,1 +1,0 @@
-setInterval(() => document.location.href = '/checks', 60000);

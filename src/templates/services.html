@@ -30,7 +30,7 @@
                     </td>
                     <td><a href="/services/edit/{{ service.id }}" class="btn btn-default">edit</a></td>
                     <td>
-                        <form action="/services/delete" method="post">
+                        <form name="delete-form" action="/services/delete" method="post">
                             <input name="id" type="hidden" value="{{ service.id }}"/>
                             <input type="submit" class="btn btn-danger" value="delete"/>
                         </form>
@@ -41,4 +41,14 @@
     </table>
     <a href="/services/add" class="btn btn-default">create new service</a>
 </div>
+<script>
+
+    $('[name="delete-form"]').submit((event) => {
+
+        if (!confirm('Confirm deletion?')) {
+            event.preventDefault();
+        }
+    })
+
+</script>
 {% endblock %}

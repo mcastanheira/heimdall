@@ -3,7 +3,7 @@
 <div>
     <h1 class="title">{{ title }}</h1>
     <div class="container text-left">
-        <form action="/services" method="post">
+        <form id="service-form" action="/services" method="post">
             <div class="form-group">
                 <input name="id" type="hidden" value="{{ service.id }}"/>
             </div>
@@ -26,7 +26,7 @@
             </div>
             <div class="form-group">
                 <label for="host">Host</label>
-                <input name="host" type="text" class="form-control" value="{{ service.host }}" placeholder="localhost"/>
+                <input name="host" type="text" class="form-control" value="{{ service.host }}" placeholder="localhost" disabled/>
             </div>
             <div class="form-group">
                 <label for="port">Port</label>
@@ -39,14 +39,14 @@
             <div class="form-group">
                 <div>
                     <div class="form-check form-check-inline">
-                        <input name="restart" type="checkbox" class="form-check-input" {% ifequal service.restart 1 %}checked{% endifequal %}/>
+                        <input name="restart" type="checkbox" class="form-check-input" {% ifequal service.restart 1 %}checked{% endifequal %} disabled/>
                         <label for="restart" class="form-check-label">Should Restart</label>
                     </div>
                 </div>
             </div>
             <div class="form-group">
                 <label for="command">Command to Restart</label>
-                <input name="command" type="text" class="form-control" value="{{ service.command }}" placeholder="/java -jar myService.jar --port 8080"/>
+                <input name="command" type="text" class="form-control" value="{{ service.command }}" placeholder="/java -jar myService.jar --port 8080" disabled/>
             </div>
             <div class="form-group">
                 <input type="submit" class="btn btn-default" value="save"/>
@@ -54,4 +54,8 @@
             </div>
         </form>
     </div>
+</div>
+<script>
+    startServiceFormValidation();
+</script>
 {% endblock %}
