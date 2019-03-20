@@ -14,8 +14,10 @@
 
 (selmer/set-resource-path! (clojure.java.io/resource "./templates"))
 
-(defn- load-configurations-page [port check-interval timestamp-mask]
-  (selmer/render-file "configurations.html" {:port port :check-interval check-interval :timestamp-mask timestamp-mask}))
+(defn- load-configurations-page [port check-interval timestamp-mask failures-before-restart]
+  (selmer/render-file 
+    "configurations.html" 
+    {:port port :check-interval check-interval :timestamp-mask timestamp-mask :failures-before-restart failures-before-restart}))
 
 (defn- load-services-page [services timestamp-mask messages]
   (selmer/render-file 
@@ -63,7 +65,7 @@
   "Start the web server" 
   [config]
   (let [
-    {:keys [port check-interval timestamp-mask]} config 
+    {:keys [port check-interval timestamp-mask failures-before-restart]} config 
     date-format (SimpleDateFormat. timestamp-mask)]
     (filters/add-filter! :format-timestamp (fn [timestamp] (.format date-format (java.util.Date. timestamp))))
     (jetty/run-jetty 
@@ -74,7 +76,7 @@
               (GET "/" [] 
                 (response/redirect "/checks"))
               (GET "/configurations" [] 
-                (load-configurations-page port check-interval timestamp-mask))
+                (load-configurations-page port check-interval timestamp-mask failures-before-restart))
               (GET "/services" request 
                 (load-services-page (database/get-services) timestamp-mask (:flash request)))
               (POST "/services" request  
