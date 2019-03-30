@@ -4,33 +4,35 @@
 
 ## Installation
 
-Download from http://example.com/FIXME.
+Download the latest standalone jar file from <a href="https://github.com/mcastanheira/heimdall/blob/master/jar/" target="_blank">https://github.com/mcastanheira/heimdall/blob/master/jar/</a>.
 
 ## Usage
 
-FIXME: explanation
+Heimdall needs a configuration file to know some basic information. Create a file like this:
 
-    $ java -jar heimdall-0.1.0-standalone.jar [args]
+<pre>
+{
+  :port 3000 ;port where Heimdall will listen for requests
+  :check-interval 300 ;interval (in seconds) between service checks 
+  :timestamp-mask "dd/MM/yyyy HH:mm:ss" ;mask to be used to format the timestamps of checks}
+</pre>
+
+Then you can start Heimdall with the following command:
+
+<pre>java -jar heimdall-&lt;version&gt;-standalone.jar -c &lt;path-to-your-config-file&gt;</pre>
+
+**Note:** if you do not inform the config file path, it's assumed to be **cfg/heimdall.clj**.
+
+On the first run, **Heimdall** will create the database used to store the services and checks in the path **db/heimdall.db**.
+
+After the startup, you can access **Heimdall** in the URL http://&lt;machine-where-heimdall-is-running&gt;:&lt;port-informed-in-the-config-file&gt;
 
 ## Options
 
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+**-c** or **--config-file** &lt;PATH&gt;
 
 ## License
 
-Copyright © 2019 FIXME
+Copyright © 2019
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Eclipse Public License either version 1.0 or any later version.
