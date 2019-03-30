@@ -14,12 +14,9 @@
       (jdbc/create-table-ddl :services [
         [:id :integer :primary :key :autoincrement] 
         [:name :text] 
-        [:origin :text]
         [:host :text]
         [:port :integer]
-        [:heartbeat :text]
-        [:restart :boolean]
-        [:command :text]])
+        [:heartbeat :text]])
       (jdbc/create-table-ddl :checks [
         [:id :integer :primary :key :autoincrement] 
         [:status :text] 

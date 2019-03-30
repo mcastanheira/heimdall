@@ -6,11 +6,9 @@
         <theader>
             <tr>
                 <th>Name</th>
-                <th>Origin</th>
                 <th>Host</th>
                 <th>Port</th>
                 <th>Heartbeat</th>
-                <th class="text-center">Should Restart</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -19,15 +17,9 @@
             {% for service in services %}
                 <tr>
                     <td>{{ service.name }}</td>
-                    <td>{{ service.origin }}</td>
                     <td>{{ service.host }}</td>
                     <td>{{ service.port }}</td>
                     <td>{{ service.heartbeat }}</td>
-                    <td class="text-center">
-                        {% ifequal service.restart 1 %} 
-                            <i class="far fa-check-circle"></i>
-                        {% endifequal %}
-                    </td>
                     <td><a href="/services/edit/{{ service.id }}" class="btn btn-default">edit</a></td>
                     <td>
                         <form name="delete-form" action="/services/delete" method="post">
