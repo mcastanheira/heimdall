@@ -9,9 +9,11 @@
   :subname     "db/heimdall.db"})
 
 (defn- create-db []
+  (let [db-dir (java.io.File. "db")] 
+    (if (not (.exists db-dir)) (.mkdir db-dir)))
   (try 
     (jdbc/db-do-commands db
-      (jdbc/create-table-ddl :services [
+      [(jdbc/create-table-ddl :services [
         [:id :integer :primary :key :autoincrement] 
         [:name :text] 
         [:host :text]
@@ -23,7 +25,7 @@
         [:message :text]
         [:timestamp :timestamp]
         [:service_id :integer]
-        ["foreign key(service_id) references services(id)"]]))
+        ["foreign key(service_id) references services(id)"]])])
     (catch Exception e
       (println (.getMessage e)))))
 
